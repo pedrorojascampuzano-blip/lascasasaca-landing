@@ -58,13 +58,6 @@
   .hero{position:relative;min-height:100svh;display:flex;align-items:flex-end;overflow:hidden}
   .hero__art{position:absolute;inset:0;z-index:0}
   .hero__art img{width:100%;height:100%;object-fit:cover}
-  .hero__sun{position:absolute;z-index:1;width:min(30vw,360px);aspect-ratio:1;left:10.5%;top:24%;transform:translate(-50%,-50%);pointer-events:none;opacity:.7;
-    background:repeating-conic-gradient(from 0deg, #E0A82E 0deg 0.7deg, transparent 0.7deg 22.5deg);
-    -webkit-mask:radial-gradient(closest-side, transparent 54%, #000 56%);
-    mask:radial-gradient(closest-side, transparent 54%, #000 56%);
-    animation:sunspin 120s linear infinite}
-  @keyframes sunspin{to{transform:translate(-50%,-50%) rotate(360deg)}}
-  @media(max-width:760px){.hero__sun{display:none}}
   .hero__art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(244,237,221,.42) 0,rgba(244,237,221,0) 28%,rgba(34,33,77,.06) 60%,rgba(34,33,77,.5) 100%)}
   .hero__inner{position:relative;z-index:2;width:100%;padding:0 var(--s4) clamp(48px,7vh,84px)}
   .hero__inner .in{max-width:var(--maxw);margin:0 auto;position:relative}
@@ -221,7 +214,6 @@
 
   <section class="hero" data-perch="0.64,0.30">
     <div class="hero__art"><img src="./assets/illus-day.png" alt="Ilustración de la bahía de Acapulco con sol, palmeras y casas de teja" fetchpriority="high"></div>
-    <div class="hero__sun" aria-hidden="true"></div>
     <div class="hero__inner"><div class="in">
       <div class="stamp" aria-label="Est. 1989">
         <div class="stamp__ring">
@@ -370,11 +362,15 @@
       return SECS[0];
     }
     const DEFAULTS=[
-      {sec:'.hero',fx:.84,fy:.60},
-      {sec:'#ventanas',fx:.5,fy:.06},
-      {sec:'#mapa',fx:.20,fy:.45},
-      {sec:'#proceso',fx:.5,fy:.04},
-      {sec:'#contacto',fx:.80,fy:.40},
+      {sec:'.hero',fx:0.7848,fy:0.797},
+      {sec:'#ventanas',fx:0.4612,fy:0.5506},
+      {sec:'#mapa',fx:0.736,fy:0.5663},
+      {sec:'#mapa',fx:0.1183,fy:0.998},
+      {sec:'#contacto',fx:0.7722,fy:0.82},
+      {sec:'#proceso',fx:0.8408,fy:0.5789},
+      {sec:'#ventanas',fx:0.1023,fy:0.9988},
+      {sec:'#ventanas',fx:0.0355,fy:0.2413},
+      {sec:'.hero',fx:0.151,fy:5.1429},
     ];
     let anchors;
     try{anchors=JSON.parse(localStorage.getItem('lca_anchors'));}catch(e){}
