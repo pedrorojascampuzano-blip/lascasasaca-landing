@@ -114,7 +114,7 @@
   .mapwrap{position:relative;width:min(1000px,92%);margin:0 auto}
   .mapwrap>img{width:100%;display:block;border:0;border-radius:0}
   .pin{position:absolute;transform:translate(-50%,-50%);z-index:3}
-  .pin .dot{position:relative;width:22px;height:22px;border-radius:50%;background:var(--gold);border:2.5px solid var(--navy);cursor:pointer;box-shadow:0 0 0 0 rgba(34,33,77,.45);animation:pulse 2.6s infinite}
+  .pin .dot{display:block;position:relative;width:22px;height:22px;border-radius:50%;background:var(--gold);border:2.5px solid var(--navy);cursor:pointer;box-shadow:0 0 0 0 rgba(34,33,77,.45);animation:pulse 2.6s infinite}
   .pin .dot::after{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--navy)}
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,33,77,.4)}70%{box-shadow:0 0 0 16px rgba(34,33,77,0)}100%{box-shadow:0 0 0 0 rgba(34,33,77,0)}}
   .pin__card{position:absolute;left:50%;bottom:30px;transform:translateX(-50%) translateY(8px);width:212px;background:var(--paper);border:2px solid var(--navy);border-radius:6px;padding:14px 16px;opacity:0;pointer-events:none;transition:opacity .35s var(--ease),transform .35s var(--ease);box-shadow:0 14px 30px rgba(0,0,0,.3)}
@@ -254,9 +254,9 @@
   <section id="mapa" class="mapsec" data-perch="0.16,0.42">
     <div class="mapwrap reveal">
       <img src="./assets/map.png" alt="Mapa ilustrado de México con Acapulco, Riviera Maya y Punta Mita">
-      <div class="pin" style="left:53%;top:79%"><span class="dot"></span><div class="pin__card"><h3>Acapulco</h3><p>Nuestra casa desde 1989. Las Brisas, Guitarrón y Diamante.</p></div></div>
-      <div class="pin pin--r" style="left:88%;top:49%"><span class="dot"></span><div class="pin__card"><h3>Riviera Maya</h3><p>Caribe turquesa, inversión vacacional frente a la playa.</p></div></div>
-      <div class="pin" style="left:40%;top:63%"><span class="dot"></span><div class="pin__card"><h3>Punta Mita</h3><p>Pacífico de lujo en Nayarit, comunidades privadas y golf.</p></div></div>
+      <div class="pin" style="left:54%;top:84%"><span class="dot"></span><div class="pin__card"><h3>Acapulco</h3><p>Nuestra casa desde 1989. Las Brisas, Guitarrón y Diamante.</p></div></div>
+      <div class="pin pin--r" style="left:93%;top:62%"><span class="dot"></span><div class="pin__card"><h3>Riviera Maya</h3><p>Caribe turquesa, inversión vacacional frente a la playa.</p></div></div>
+      <div class="pin" style="left:41%;top:64%"><span class="dot"></span><div class="pin__card"><h3>Punta Mita</h3><p>Pacífico de lujo en Nayarit, comunidades privadas y golf.</p></div></div>
       <p class="mapcap">Tres costas. Pasa el cursor sobre cada punto.</p>
     </div>
   </section>
