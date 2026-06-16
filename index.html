@@ -357,66 +357,102 @@
     addEventListener('load',()=>setTimeout(()=>reveals.forEach(el=>el.classList.add('in')),1400));
   }else{reveals.forEach(el=>el.classList.add('in'));}
 
-  /* guacamaya: fija al viewport, vuela entre perchas por seccion, NUNCA sale de cuadro.
-     Editor visual en ?edit=1 (arrastra la guacamaya para fijar la percha de cada seccion). */
+  /* guacamaya: ANCLAS ancladas al contenido (scrollean con la pagina).
+     Si un ancla esta en pantalla -> vuela hacia ella y se posa. Si ninguna esta en pantalla -> modo vuelo
+     (queda volando en la orilla, NUNCA fuera de cuadro). Editor visual en ?edit=1. */
   (function(){
     const bird=document.getElementById('bird');
     if(!bird||matchMedia('(prefers-reduced-motion: reduce)').matches||innerWidth<=900) return;
     const BW=86, NAV=74, M=12;
-    const SECS=[
-      {k:'hero',     sel:'.hero'},
-      {k:'ventanas', sel:'#ventanas'},
-      {k:'mapa',     sel:'#mapa'},
-      {k:'proceso',  sel:'#proceso'},
-      {k:'contacto', sel:'#contacto'},
-    ];
-    const DEF={hero:{fx:.84,fy:.60},ventanas:{fx:.50,fy:.22},mapa:{fx:.20,fy:.46},proceso:{fx:.50,fy:.62},contacto:{fx:.80,fy:.52}};
-    let perches=Object.assign({},DEF);
-    try{const s=JSON.parse(localStorage.getItem('lca_perches')||'{}');Object.assign(perches,s);}catch(e){}
-    const els=SECS.map(s=>document.querySelector(s.sel));
-    function clampX(x){return Math.max(M, Math.min(x, innerWidth-BW-M));}
-    function clampY(y){return Math.max(NAV+8, Math.min(y, innerHeight-BW-M));}
-    function target(i){const p=perches[SECS[i].k]||DEF[SECS[i].k];return [clampX(innerWidth*p.fx-BW/2), clampY(innerHeight*p.fy-BW/2)];}
-    let active=0, [tx,ty]=target(0), cx=tx, cy=ty, face=1;
-    function pick(){
-      const mid=innerHeight/2; let best=0,bd=1e9;
-      els.forEach((e,i)=>{if(!e)return;const r=e.getBoundingClientRect();const c=r.top+r.height/2;const d=Math.abs(c-mid);if(d<bd){bd=d;best=i;}});
-      if(best!==active){active=best; if(!dragging)[tx,ty]=target(best); if(panel)refreshPanel();}
+    const SECS=['.hero','#ventanas','#mapa','#proceso','#contacto'];
+    function secAt(docY){ /* seccion que contiene un punto del documento */
+      for(const s of SECS){const e=document.querySelector(s);if(!e)continue;const r=e.getBoundingClientRect();const top=r.top+scrollY,bot=top+r.height;if(docY>=top&&docY<bot)return s;}
+      return SECS[0];
     }
-    addEventListener('scroll',pick,{passive:true});
-    addEventListener('resize',()=>{[tx,ty]=target(active);},{passive:true});
-    pick();
+    const DEFAULTS=[
+      {sec:'.hero',fx:.84,fy:.60},
+      {sec:'#ventanas',fx:.5,fy:.06},
+      {sec:'#mapa',fx:.20,fy:.45},
+      {sec:'#proceso',fx:.5,fy:.04},
+      {sec:'#contacto',fx:.80,fy:.40},
+    ];
+    let anchors;
+    try{anchors=JSON.parse(localStorage.getItem('lca_anchors'));}catch(e){}
+    if(!Array.isArray(anchors)||!anchors.length) anchors=DEFAULTS.map(a=>({...a}));
+    function save(){localStorage.setItem('lca_anchors',JSON.stringify(anchors));}
+    const clampX=x=>Math.max(M,Math.min(x,innerWidth-BW-M));
+    const clampY=y=>Math.max(NAV+8,Math.min(y,innerHeight-BW-M));
+    function aVp(a){const e=document.querySelector(a.sec);if(!e)return null;const r=e.getBoundingClientRect();return {x:r.left+a.fx*r.width, y:r.top+a.fy*r.height};}
+    let cx=innerWidth*.8, cy=innerHeight*.5, face=1;
     function tick(){
-      const dx=tx-cx, dy=ty-cy, dist=Math.hypot(dx,dy);
-      if(!dragging){ if(dist>0.6){cx+=dx*0.06; cy+=dy*0.06;} }
+      /* prefiere un ancla EN PANTALLA (la mas cercana al centro); si ninguna, vuela hacia la mas cercana */
+      const isOn=v=>v.y>NAV+20 && v.y<innerHeight-M && v.x>M && v.x<innerWidth-M;
+      let best=null,bd=1e9,bestOn=false;
+      for(const a of anchors){const v=aVp(a);if(!v)continue;const on=isOn(v);const d=Math.abs(v.y-innerHeight/2);
+        if((on&&!bestOn)||(on===bestOn&&d<bd)){bd=d;best=v;bestOn=on;}}
+      let tx=cx,ty=cy,flying=true;
+      if(best){
+        tx=clampX(best.x-BW/2); ty=clampY(best.y-BW/2);
+        flying = !bestOn || Math.hypot(tx-cx,ty-cy)>14;
+      }
+      const dx=tx-cx, dy=ty-cy;
+      if(!dragging){cx+=dx*0.07; cy+=dy*0.07;}
       cx=clampX(cx); cy=clampY(cy);
-      bird.classList.toggle('flying', !dragging && dist>30);
-      if(Math.abs(dx)>1.5) face=dx<0?-1:1;
+      bird.classList.toggle('flying',flying && !dragging);
+      if(Math.abs(dx)>1.2) face=dx<0?-1:1;
       bird.style.transform=`translate(${Math.round(cx)}px,${Math.round(cy)}px) scaleX(${face})`;
       requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
 
-    /* ---------- EDITOR ---------- */
-    let dragging=false, panel=null;
+    /* ---------- EDITOR (?edit=1): clic = agregar ancla, arrastrar = mover, doble clic = borrar ---------- */
+    let dragging=false;
     if(!/[?&]edit/.test(location.search)) return;
-    bird.classList.add('edit');
-    panel=document.createElement('div'); panel.id='perchpanel'; document.body.appendChild(panel);
-    function refreshPanel(){
-      const k=SECS[active].k, p=perches[k]||DEF[k];
-      panel.innerHTML='<h4>Editor de la guacamaya</h4>Arrastra la guacamaya a donde quieras que se pose en la seccion <b>'+k+'</b>.<br>Vuela libre entre secciones y nunca sale de cuadro.<div class="row"><button id="pcopy">Copiar config</button><button id="preset" class="alt">Limpiar</button></div>';
-      panel.querySelector('#pcopy').onclick=()=>{navigator.clipboard.writeText(JSON.stringify(perches,null,2));panel.querySelector('#pcopy').textContent='Copiado!';setTimeout(()=>panel.querySelector('#pcopy').textContent='Copiar config',1200);};
-      panel.querySelector('#preset').onclick=()=>{perches=Object.assign({},DEF);localStorage.removeItem('lca_perches');[tx,ty]=target(active);refreshPanel();};
+    const layer=document.createElement('div');
+    layer.style.cssText='position:absolute;inset:0;width:100%;z-index:45;cursor:crosshair';
+    document.body.style.position='relative'; document.body.appendChild(layer);
+    function syncLayer(){layer.style.height=document.body.scrollHeight+'px';}
+    const panel=document.createElement('div'); panel.id='perchpanel'; document.body.appendChild(panel);
+    function render(){
+      syncLayer();
+      [...layer.querySelectorAll('.amk')].forEach(n=>n.remove());
+      anchors.forEach((a,i)=>{
+        const e=document.querySelector(a.sec); if(!e)return;
+        const r=e.getBoundingClientRect();
+        const dx=r.left+scrollX + a.fx*r.width, dy=r.top+scrollY + a.fy*r.height;
+        const m=document.createElement('div'); m.className='amk'; m.dataset.i=i;
+        m.style.cssText='position:absolute;width:24px;height:24px;border-radius:50%;background:#F0BE2E;border:2.5px solid #22214D;color:#22214D;font:700 12px sans-serif;display:flex;align-items:center;justify-content:center;transform:translate(-50%,-50%);cursor:grab;left:'+dx+'px;top:'+dy+'px;box-shadow:0 2px 6px rgba(0,0,0,.3)';
+        m.textContent=i+1;
+        layer.appendChild(m);
+      });
+      panel.innerHTML='<h4>Anclas de la guacamaya</h4>Clic en cualquier lado = <b>agregar</b> ancla.<br>Arrastra un punto = <b>mover</b>. Doble clic = <b>borrar</b>.<br>El pajaro vuela a la ancla visible y nunca sale de cuadro.<div style="margin-top:6px">Anclas: <b>'+anchors.length+'</b></div><div class="row"><button id="pcopy">Copiar config</button><button id="preset" class="alt">Limpiar</button></div>';
+      panel.querySelector('#pcopy').onclick=()=>{navigator.clipboard.writeText(JSON.stringify(anchors,null,2));panel.querySelector('#pcopy').textContent='Copiado!';setTimeout(render,1100);};
+      panel.querySelector('#preset').onclick=()=>{anchors=DEFAULTS.map(a=>({...a}));save();render();};
     }
-    refreshPanel();
-    function save(px,py){
-      const k=SECS[active].k;
-      perches[k]={fx:+((px+BW/2)/innerWidth).toFixed(4), fy:+((py+BW/2)/innerHeight).toFixed(4)};
-      localStorage.setItem('lca_perches',JSON.stringify(perches));
-    }
-    bird.addEventListener('pointerdown',e=>{dragging=true;bird.classList.add('grabbing');bird.setPointerCapture(e.pointerId);e.preventDefault();});
-    bird.addEventListener('pointermove',e=>{if(!dragging)return;cx=clampX(e.clientX-BW/2);cy=clampY(e.clientY-BW/2);tx=cx;ty=cy;});
-    bird.addEventListener('pointerup',e=>{if(!dragging)return;dragging=false;bird.classList.remove('grabbing');save(cx,cy);});
+    render();
+    addEventListener('scroll',render,{passive:true}); addEventListener('resize',render,{passive:true});
+    let drag=null;
+    layer.addEventListener('pointerdown',e=>{
+      const mk=e.target.closest('.amk');
+      if(mk){drag=+mk.dataset.i;dragging=true;mk.style.cursor='grabbing';layer.setPointerCapture(e.pointerId);e.preventDefault();}
+    });
+    layer.addEventListener('pointermove',e=>{
+      if(drag==null)return;
+      const docY=e.clientY+scrollY, sec=secAt(docY), el=document.querySelector(sec), r=el.getBoundingClientRect();
+      anchors[drag]={sec, fx:+((e.clientX-r.left)/r.width).toFixed(4), fy:+((e.clientY-r.top)/r.height).toFixed(4)};
+      render();
+    });
+    layer.addEventListener('pointerup',()=>{if(drag!=null){drag=null;dragging=false;save();render();}});
+    layer.addEventListener('click',e=>{
+      if(e.target.closest('.amk'))return;
+      const docY=e.clientY+scrollY, sec=secAt(docY), el=document.querySelector(sec), r=el.getBoundingClientRect();
+      anchors.push({sec, fx:+((e.clientX-r.left)/r.width).toFixed(4), fy:+((e.clientY-r.top)/r.height).toFixed(4)});
+      save();render();
+    });
+    layer.addEventListener('dblclick',e=>{
+      const mk=e.target.closest('.amk'); if(!mk)return;
+      if(anchors.length>1){anchors.splice(+mk.dataset.i,1);save();render();}
+    });
   })();
 </script>
 </body>
