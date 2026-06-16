@@ -31,9 +31,9 @@
   a{color:inherit;text-decoration:none}
   img{display:block;max-width:100%}
   h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.05;letter-spacing:-.02em;margin:0;color:var(--navy)}
-  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--s4)}
-  @media(max-width:600px){.wrap{padding:0 var(--s3)}}
-  .eyebrow{font:600 .72rem/1 var(--sans);text-transform:uppercase;letter-spacing:.26em;color:var(--coral-deep)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding-inline:var(--s4)}
+  @media(max-width:600px){.wrap{padding-inline:var(--s3)}}
+  .eyebrow{font:600 .72rem/1 var(--sans);text-transform:uppercase;letter-spacing:.15em;color:var(--coral-deep)}
   .lead{font-size:clamp(1.05rem,1.5vw,1.25rem);color:var(--muted);line-height:1.6}
   .btn{display:inline-flex;align-items:center;gap:.55em;font-weight:600;font-size:.94rem;padding:14px 28px;border-radius:var(--r);background:var(--navy);color:var(--cream);border:1px solid var(--navy);transition:transform .3s var(--ease),background .3s}
   .btn:hover{background:var(--navy-deep);transform:translateY(-2px)}
@@ -84,8 +84,8 @@
   /* VENTANAS · dibujo -> foto, precio en hover */
   .ventanas{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--s3)}
   .vent{position:relative;display:block;overflow:hidden;background:var(--cream-2);border-radius:var(--r)}
-  .vent--a{grid-column:span 7;aspect-ratio:7/5}
-  .vent--b{grid-column:span 5;aspect-ratio:7/5}
+  .vent--a{grid-column:span 7;height:clamp(360px,38vw,480px)}
+  .vent--b{grid-column:span 5;height:clamp(360px,38vw,480px)}
   .vent--c{grid-column:span 4;aspect-ratio:1/1}
   .vent .layer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   .vent .photo{opacity:0;transform:scale(1.04);transition:opacity .7s var(--ease),transform 1s var(--ease)}
@@ -107,7 +107,7 @@
   @media(hover:none){
     .vent .photo{opacity:1}.vent__scrim{opacity:1}.vent__info{opacity:1;transform:none}.vent__price{opacity:1;transform:none}.vent__ix{display:none}
   }
-  @media(max-width:820px){.vent--a,.vent--b,.vent--c{grid-column:span 12;aspect-ratio:16/10}}
+  @media(max-width:820px){.vent--a,.vent--b,.vent--c{grid-column:span 12;height:auto;aspect-ratio:16/10}}
 
   /* MAPA · full bleed, sin borde */
   .mapsec{background:var(--teal);padding:0;scroll-margin-top:var(--nav-h)}
@@ -250,9 +250,9 @@
   <section id="mapa" class="mapsec" data-perch="0.16,0.42">
     <div class="mapwrap reveal">
       <img src="./assets/map.png" alt="Mapa ilustrado de México con Acapulco, Riviera Maya y Punta Mita">
-      <div class="pin" style="left:57%;top:70%"><span class="dot"></span><div class="pin__card"><h3>Acapulco</h3><p>Nuestra casa desde 1989. Las Brisas, Guitarrón y Diamante.</p></div></div>
-      <div class="pin pin--r" style="left:95%;top:58%"><span class="dot"></span><div class="pin__card"><h3>Riviera Maya</h3><p>Caribe turquesa, inversión vacacional frente a la playa.</p></div></div>
-      <div class="pin" style="left:40%;top:57%"><span class="dot"></span><div class="pin__card"><h3>Punta Mita</h3><p>Pacífico de lujo en Nayarit, comunidades privadas y golf.</p></div></div>
+      <div class="pin" style="left:53%;top:79%"><span class="dot"></span><div class="pin__card"><h3>Acapulco</h3><p>Nuestra casa desde 1989. Las Brisas, Guitarrón y Diamante.</p></div></div>
+      <div class="pin pin--r" style="left:88%;top:49%"><span class="dot"></span><div class="pin__card"><h3>Riviera Maya</h3><p>Caribe turquesa, inversión vacacional frente a la playa.</p></div></div>
+      <div class="pin" style="left:40%;top:63%"><span class="dot"></span><div class="pin__card"><h3>Punta Mita</h3><p>Pacífico de lujo en Nayarit, comunidades privadas y golf.</p></div></div>
       <p class="mapcap">Tres costas. Pasa el cursor sobre cada punto.</p>
     </div>
   </section>
