@@ -58,6 +58,13 @@
   .hero{position:relative;min-height:100svh;display:flex;align-items:flex-end;overflow:hidden}
   .hero__art{position:absolute;inset:0;z-index:0}
   .hero__art img{width:100%;height:100%;object-fit:cover}
+  .hero__sun{position:absolute;z-index:1;width:min(30vw,360px);aspect-ratio:1;left:10.5%;top:24%;transform:translate(-50%,-50%);pointer-events:none;opacity:.7;
+    background:repeating-conic-gradient(from 0deg, #E0A82E 0deg 0.7deg, transparent 0.7deg 22.5deg);
+    -webkit-mask:radial-gradient(closest-side, transparent 54%, #000 56%);
+    mask:radial-gradient(closest-side, transparent 54%, #000 56%);
+    animation:sunspin 120s linear infinite}
+  @keyframes sunspin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+  @media(max-width:760px){.hero__sun{display:none}}
   .hero__art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(244,237,221,.42) 0,rgba(244,237,221,0) 28%,rgba(34,33,77,.06) 60%,rgba(34,33,77,.5) 100%)}
   .hero__inner{position:relative;z-index:2;width:100%;padding:0 var(--s4) clamp(48px,7vh,84px)}
   .hero__inner .in{max-width:var(--maxw);margin:0 auto;position:relative}
@@ -66,11 +73,10 @@
   .hero__lead{margin-top:var(--s3);color:rgba(255,255,255,.94);max-width:40ch;font-size:clamp(1.05rem,1.5vw,1.22rem);text-shadow:0 1px 14px rgba(25,24,67,.45)}
   /* estampita circular */
   .stamp{position:absolute;top:-118px;right:4px;width:124px;height:124px;rotate:-7deg}
-  .stamp__ring{width:100%;height:100%;border-radius:50%;background:var(--paper);border:2px solid var(--navy);box-shadow:0 12px 30px rgba(25,24,67,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;color:var(--navy);font-family:var(--display)}
-  .stamp__ring::before{content:"";position:absolute;inset:7px;border-radius:50%;border:1.5px dashed var(--navy)}
-  .stamp__sun{width:22px;height:22px;margin-bottom:5px}
-  .stamp__y{font-size:1.45rem;font-style:italic;line-height:1;letter-spacing:.01em}
-  .stamp__t{font-size:.56rem;font-family:var(--sans);font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--coral-deep);margin-top:3px}
+  .stamp__ring{width:100%;height:100%;border-radius:50%;background:var(--paper);border:3px solid var(--navy);box-shadow:0 12px 30px rgba(25,24,67,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;position:relative;color:var(--navy);font-family:var(--display)}
+  .stamp__ring::before{content:"";position:absolute;inset:6px;border-radius:50%;border:1.5px solid var(--navy)}
+  .stamp__sun{width:36px;height:36px}
+  .stamp__y{font-size:.96rem;font-family:var(--sans);font-weight:700;letter-spacing:.1em;line-height:1;color:var(--navy)}
   @media(max-width:760px){.stamp{position:static;margin-bottom:var(--s3);rotate:-5deg}}
 
   section{padding:var(--s7) 0;scroll-margin-top:var(--nav-h)}
@@ -164,7 +170,7 @@
   .wa svg{width:32px;height:32px;fill:var(--navy)}
 
   /* guacamaya scroll mascot · anclada a la imagen (doc coords) */
-  #bird{position:absolute;width:62px;height:62px;left:0;top:0;z-index:6;pointer-events:none;will-change:transform}
+  #bird{position:absolute;width:86px;height:86px;left:0;top:0;z-index:6;pointer-events:none;will-change:transform}
   #bird img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 9px 12px rgba(25,24,67,.24))}
   #bird .f1,#bird .f2{opacity:0}
   #bird.flying .perch{opacity:0}
@@ -206,12 +212,12 @@
 
   <section class="hero" data-perch="0.64,0.30">
     <div class="hero__art"><img src="./assets/illus-day.png" alt="Ilustración de la bahía de Acapulco con sol, palmeras y casas de teja" fetchpriority="high"></div>
+    <div class="hero__sun" aria-hidden="true"></div>
     <div class="hero__inner"><div class="in">
-      <div class="stamp" aria-label="Established 1989">
+      <div class="stamp" aria-label="Est. 1989">
         <div class="stamp__ring">
-          <svg class="stamp__sun" viewBox="0 0 40 40" fill="none" stroke="#22214D" stroke-width="2.4" stroke-linecap="round"><circle cx="20" cy="20" r="7" fill="#F0BE2E"/><g stroke="#D8693B"><line x1="20" y1="4" x2="20" y2="9"/><line x1="20" y1="31" x2="20" y2="36"/><line x1="4" y1="20" x2="9" y2="20"/><line x1="31" y1="20" x2="36" y2="20"/><line x1="8.5" y1="8.5" x2="12" y2="12"/><line x1="28" y1="28" x2="31.5" y2="31.5"/><line x1="31.5" y1="8.5" x2="28" y2="12"/><line x1="12" y1="28" x2="8.5" y2="31.5"/></g></svg>
-          <div class="stamp__y">1989</div>
-          <div class="stamp__t">established</div>
+          <svg class="stamp__sun" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="8.5" fill="#F0BE2E" stroke="#22214D" stroke-width="2.4"/><g stroke="#D8693B" stroke-width="2.4" stroke-linecap="round"><line x1="24" y1="4" x2="24" y2="10"/><line x1="24" y1="38" x2="24" y2="44"/><line x1="4" y1="24" x2="10" y2="24"/><line x1="38" y1="24" x2="44" y2="24"/><line x1="9.5" y1="9.5" x2="13.5" y2="13.5"/><line x1="34.5" y1="34.5" x2="38.5" y2="38.5"/><line x1="38.5" y1="9.5" x2="34.5" y2="13.5"/><line x1="13.5" y1="34.5" x2="9.5" y2="38.5"/></g></svg>
+          <div class="stamp__y">EST. 1989</div>
         </div>
       </div>
     </div></div>
@@ -264,25 +270,25 @@
   <section id="proceso" data-perch="0.92,0.24">
     <div class="wrap">
       <div class="shead reveal">
-        <div class="l"><span class="eyebrow">Cómo te acompañamos</span><h2>De la primera vista a las llaves.</h2></div>
-        <p class="r">Acompañamos cada paso, de un lado de la bahía al otro. Tú decides hasta dónde; nosotros ponemos la trayectoria, las llaves y la zona en la cabeza.</p>
+        <div class="l"><span class="eyebrow">Lo que hacemos</span><h2>Cuatro formas de trabajar contigo.</h2></div>
+        <p class="r">Compra, renta, desarrollo o cuidado de tu propiedad. Elige por dónde entrar; nosotros ponemos la zona, la trayectoria y las llaves.</p>
       </div>
       <div class="steps">
         <div class="step reveal">
           <span class="sic"><svg viewBox="0 0 40 40" fill="none" stroke="#22214D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 19 20 8l13 11"/><path d="M10 17v15h20V17"/><path d="M17 32v-8h6v8"/></svg></span>
-          <div class="n">01</div><h3>Venta</h3><p>Encontramos la propiedad correcta y negociamos por ti.</p>
+          <h3>Venta</h3><p>Encontramos la propiedad correcta y negociamos por ti.</p>
         </div>
         <div class="step reveal">
-          <span class="sic"><svg viewBox="0 0 40 40" fill="none" stroke="#22214D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 33c0-3 4-6 9-6"/><path d="M20 9c-5 4-5 11 0 15 5-4 5-11 0-15Z"/><path d="M20 24v9"/><circle cx="28" cy="29" r="4"/></svg></span>
-          <div class="n">02</div><h3>Renta vacacional</h3><p>Casas listas para disfrutar o para rentar todo el año.</p>
+          <span class="sic"><svg viewBox="0 0 40 40" fill="none" stroke="#22214D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="11" r="4"/><path d="M8 19h16l-2 6H10z"/><path d="M9 25v7M23 25v7M9 30h14"/></svg></span>
+          <h3>Renta vacacional</h3><p>Casas listas para disfrutar o para rentar todo el año.</p>
         </div>
         <div class="step reveal">
-          <span class="sic"><svg viewBox="0 0 40 40" fill="none" stroke="#22214D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 32V14l12-7 12 7v18"/><path d="M8 20h24M8 26h24M20 7v25"/></svg></span>
-          <div class="n">03</div><h3>Proyectos</h3><p>Acompañamiento en desarrollos y preventa, de plano a entrega.</p>
+          <span class="sic"><svg viewBox="0 0 40 40" fill="none" stroke="#22214D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 33V13l11-6 11 6v20"/><path d="M9 20h22M9 26h22M20 7v26"/></svg></span>
+          <h3>Proyectos</h3><p>Acompañamiento en desarrollos y preventa, de plano a entrega.</p>
         </div>
         <div class="step reveal">
-          <span class="sic"><svg viewBox="0 0 40 40" fill="none" stroke="#22214D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="8"/><path d="M22 22l11 11M28 28l4-4"/></svg></span>
-          <div class="n">04</div><h3>Administración</h3><p>Cuidamos tu propiedad cuando no estás.</p>
+          <span class="sic"><svg viewBox="0 0 40 40" fill="none" stroke="#22214D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="18" r="6"/><path d="M19 18h15M30 18v6M34 18v5"/></svg></span>
+          <h3>Administración</h3><p>Cuidamos tu propiedad cuando no estás.</p>
         </div>
       </div>
     </div>
@@ -346,20 +352,26 @@
   (function(){
     const bird=document.getElementById('bird');
     if(!bird||matchMedia('(prefers-reduced-motion: reduce)').matches||innerWidth<=900) return;
-    const BW=62;
+    const BW=86;
+    /* ===== PERCHAS DE LA GUACAMAYA (editar aqui) =====
+       Una por seccion. fx/fy = fraccion dentro del elemento (0-1).
+       edge:'top' = se posa sentada en la orilla superior del elemento.
+       Se hace clamp para que NUNCA quede fuera de la pantalla. */
     const anchors=[
-      {sec:'.hero',     el:'.hero',              fx:.80, fy:.60},          /* sobre los techos */
+      {sec:'.hero',     el:'.hero',              fx:.80, fy:.58},          /* sobre los techos */
       {sec:'#ventanas', el:'#ventanas .vent--a', fx:.5,  edge:'top'},      /* sentada en la orilla de la card */
-      {sec:'#mapa',     el:'.mapwrap img',       fx:.22, fy:.42},          /* en el mar (ok) */
+      {sec:'#mapa',     el:'.mapwrap img',       fx:.20, fy:.40},          /* en el mar (ok) */
       {sec:'#proceso',  el:'#proceso .steps',    fx:.5,  edge:'top'},      /* sobre la regla fina */
-      {sec:'#contacto', el:'.band',              fx:.78, fy:.55},          /* sobre los techos del atardecer */
+      {sec:'#contacto', el:'.band',              fx:.74, fy:.55},          /* sobre los techos del atardecer */
     ];
     const secEls=anchors.map(a=>document.querySelector(a.sec));
     function docPos(a){
       const el=document.querySelector(a.el)||document.querySelector(a.sec);
       const r=el.getBoundingClientRect();
-      const x=r.left+scrollX + a.fx*r.width - BW/2;
-      const y=a.edge==='top' ? r.top+scrollY - BW + 12 : r.top+scrollY + a.fy*r.height - BW/2;
+      let x=r.left+scrollX + a.fx*r.width - BW/2;
+      let y=a.edge==='top' ? r.top+scrollY - BW + 14 : r.top+scrollY + a.fy*r.height - BW/2;
+      const maxX=document.documentElement.clientWidth - BW - 12;  /* nunca fuera de pantalla */
+      x=Math.max(12, Math.min(x, maxX));
       return [x,y];
     }
     let active=0, [tx,ty]=docPos(anchors[0]), cx=tx, cy=ty, face=1;
