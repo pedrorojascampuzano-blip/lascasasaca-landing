@@ -170,7 +170,16 @@
   .wa svg{width:32px;height:32px;fill:var(--navy)}
 
   /* guacamaya scroll mascot · anclada a la imagen (doc coords) */
-  #bird{position:absolute;width:86px;height:86px;left:0;top:0;z-index:6;pointer-events:none;will-change:transform}
+  #bird{position:fixed;width:86px;height:86px;left:0;top:0;z-index:40;pointer-events:none;will-change:transform}
+  #bird.edit{pointer-events:auto;cursor:grab}
+  #bird.edit.grabbing{cursor:grabbing}
+  /* panel editor */
+  #perchpanel{position:fixed;left:16px;bottom:16px;z-index:80;background:var(--paper);border:2px solid var(--navy);border-radius:10px;padding:14px 16px;font:500 13px/1.45 var(--sans);color:var(--navy);max-width:300px;box-shadow:0 14px 34px rgba(25,24,67,.3)}
+  #perchpanel h4{font:700 .72rem/1 var(--sans);text-transform:uppercase;letter-spacing:.14em;color:var(--coral-deep);margin:0 0 8px}
+  #perchpanel b{color:var(--coral-deep)}
+  #perchpanel .row{display:flex;gap:8px;margin-top:10px}
+  #perchpanel button{font:600 12px var(--sans);padding:8px 12px;border-radius:7px;border:1.5px solid var(--navy);background:var(--navy);color:var(--cream);cursor:pointer}
+  #perchpanel button.alt{background:transparent;color:var(--navy)}
   #bird img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 9px 12px rgba(25,24,67,.24))}
   #bird .f1,#bird .f2{opacity:0}
   #bird.flying .perch{opacity:0}
@@ -348,51 +357,66 @@
     addEventListener('load',()=>setTimeout(()=>reveals.forEach(el=>el.classList.add('in')),1400));
   }else{reveals.forEach(el=>el.classList.add('in'));}
 
-  /* guacamaya: se posa SOBRE imagenes reales (doc coords) y vuela al cambiar de seccion */
+  /* guacamaya: fija al viewport, vuela entre perchas por seccion, NUNCA sale de cuadro.
+     Editor visual en ?edit=1 (arrastra la guacamaya para fijar la percha de cada seccion). */
   (function(){
     const bird=document.getElementById('bird');
     if(!bird||matchMedia('(prefers-reduced-motion: reduce)').matches||innerWidth<=900) return;
-    const BW=86;
-    /* ===== PERCHAS DE LA GUACAMAYA (editar aqui) =====
-       Una por seccion. fx/fy = fraccion dentro del elemento (0-1).
-       edge:'top' = se posa sentada en la orilla superior del elemento.
-       Se hace clamp para que NUNCA quede fuera de la pantalla. */
-    const anchors=[
-      {sec:'.hero',     el:'.hero',              fx:.80, fy:.58},          /* sobre los techos */
-      {sec:'#ventanas', el:'#ventanas .vent--a', fx:.5,  edge:'top'},      /* sentada en la orilla de la card */
-      {sec:'#mapa',     el:'.mapwrap img',       fx:.20, fy:.40},          /* en el mar (ok) */
-      {sec:'#proceso',  el:'#proceso .steps',    fx:.5,  edge:'top'},      /* sobre la regla fina */
-      {sec:'#contacto', el:'.band',              fx:.74, fy:.55},          /* sobre los techos del atardecer */
+    const BW=86, NAV=74, M=12;
+    const SECS=[
+      {k:'hero',     sel:'.hero'},
+      {k:'ventanas', sel:'#ventanas'},
+      {k:'mapa',     sel:'#mapa'},
+      {k:'proceso',  sel:'#proceso'},
+      {k:'contacto', sel:'#contacto'},
     ];
-    const secEls=anchors.map(a=>document.querySelector(a.sec));
-    function docPos(a){
-      const el=document.querySelector(a.el)||document.querySelector(a.sec);
-      const r=el.getBoundingClientRect();
-      let x=r.left+scrollX + a.fx*r.width - BW/2;
-      let y=a.edge==='top' ? r.top+scrollY - BW + 14 : r.top+scrollY + a.fy*r.height - BW/2;
-      const maxX=document.documentElement.clientWidth - BW - 12;  /* nunca fuera de pantalla */
-      x=Math.max(12, Math.min(x, maxX));
-      return [x,y];
-    }
-    let active=0, [tx,ty]=docPos(anchors[0]), cx=tx, cy=ty, face=1;
+    const DEF={hero:{fx:.84,fy:.60},ventanas:{fx:.50,fy:.22},mapa:{fx:.20,fy:.46},proceso:{fx:.50,fy:.62},contacto:{fx:.80,fy:.52}};
+    let perches=Object.assign({},DEF);
+    try{const s=JSON.parse(localStorage.getItem('lca_perches')||'{}');Object.assign(perches,s);}catch(e){}
+    const els=SECS.map(s=>document.querySelector(s.sel));
+    function clampX(x){return Math.max(M, Math.min(x, innerWidth-BW-M));}
+    function clampY(y){return Math.max(NAV+8, Math.min(y, innerHeight-BW-M));}
+    function target(i){const p=perches[SECS[i].k]||DEF[SECS[i].k];return [clampX(innerWidth*p.fx-BW/2), clampY(innerHeight*p.fy-BW/2)];}
+    let active=0, [tx,ty]=target(0), cx=tx, cy=ty, face=1;
     function pick(){
-      const mid=scrollY+innerHeight/2; let best=0,bd=1e9;
-      secEls.forEach((s,i)=>{if(!s)return;const r=s.getBoundingClientRect();const c=r.top+scrollY+r.height/2;const d=Math.abs(c-mid);if(d<bd){bd=d;best=i;}});
-      if(best!==active){active=best;[tx,ty]=docPos(anchors[best]);}
+      const mid=innerHeight/2; let best=0,bd=1e9;
+      els.forEach((e,i)=>{if(!e)return;const r=e.getBoundingClientRect();const c=r.top+r.height/2;const d=Math.abs(c-mid);if(d<bd){bd=d;best=i;}});
+      if(best!==active){active=best; if(!dragging)[tx,ty]=target(best); if(panel)refreshPanel();}
     }
     addEventListener('scroll',pick,{passive:true});
-    addEventListener('resize',()=>{[tx,ty]=docPos(anchors[active]);},{passive:true});
-    addEventListener('load',()=>{[tx,ty]=docPos(anchors[active]);cx=tx;cy=ty;});
+    addEventListener('resize',()=>{[tx,ty]=target(active);},{passive:true});
     pick();
     function tick(){
       const dx=tx-cx, dy=ty-cy, dist=Math.hypot(dx,dy);
-      if(dist>0.6){cx+=dx*0.06; cy+=dy*0.06;}
-      bird.classList.toggle('flying',dist>30);
+      if(!dragging){ if(dist>0.6){cx+=dx*0.06; cy+=dy*0.06;} }
+      cx=clampX(cx); cy=clampY(cy);
+      bird.classList.toggle('flying', !dragging && dist>30);
       if(Math.abs(dx)>1.5) face=dx<0?-1:1;
       bird.style.transform=`translate(${Math.round(cx)}px,${Math.round(cy)}px) scaleX(${face})`;
       requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
+
+    /* ---------- EDITOR ---------- */
+    let dragging=false, panel=null;
+    if(!/[?&]edit/.test(location.search)) return;
+    bird.classList.add('edit');
+    panel=document.createElement('div'); panel.id='perchpanel'; document.body.appendChild(panel);
+    function refreshPanel(){
+      const k=SECS[active].k, p=perches[k]||DEF[k];
+      panel.innerHTML='<h4>Editor de la guacamaya</h4>Arrastra la guacamaya a donde quieras que se pose en la seccion <b>'+k+'</b>.<br>Vuela libre entre secciones y nunca sale de cuadro.<div class="row"><button id="pcopy">Copiar config</button><button id="preset" class="alt">Limpiar</button></div>';
+      panel.querySelector('#pcopy').onclick=()=>{navigator.clipboard.writeText(JSON.stringify(perches,null,2));panel.querySelector('#pcopy').textContent='Copiado!';setTimeout(()=>panel.querySelector('#pcopy').textContent='Copiar config',1200);};
+      panel.querySelector('#preset').onclick=()=>{perches=Object.assign({},DEF);localStorage.removeItem('lca_perches');[tx,ty]=target(active);refreshPanel();};
+    }
+    refreshPanel();
+    function save(px,py){
+      const k=SECS[active].k;
+      perches[k]={fx:+((px+BW/2)/innerWidth).toFixed(4), fy:+((py+BW/2)/innerHeight).toFixed(4)};
+      localStorage.setItem('lca_perches',JSON.stringify(perches));
+    }
+    bird.addEventListener('pointerdown',e=>{dragging=true;bird.classList.add('grabbing');bird.setPointerCapture(e.pointerId);e.preventDefault();});
+    bird.addEventListener('pointermove',e=>{if(!dragging)return;cx=clampX(e.clientX-BW/2);cy=clampY(e.clientY-BW/2);tx=cx;ty=cy;});
+    bird.addEventListener('pointerup',e=>{if(!dragging)return;dragging=false;bird.classList.remove('grabbing');save(cx,cy);});
   })();
 </script>
 </body>
