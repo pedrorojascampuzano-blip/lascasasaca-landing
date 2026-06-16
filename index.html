@@ -159,8 +159,8 @@
   .wa:hover{transform:translateY(-3px) rotate(-4deg);background:var(--gold)}
   .wa svg{width:32px;height:32px;fill:var(--navy)}
 
-  /* guacamaya scroll mascot · con aleteo */
-  #bird{position:fixed;width:90px;height:90px;left:0;top:0;z-index:54;pointer-events:none;will-change:transform}
+  /* guacamaya scroll mascot · anclada a la imagen (doc coords) */
+  #bird{position:absolute;width:88px;height:88px;left:0;top:0;z-index:6;pointer-events:none;will-change:transform}
   #bird img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 9px 12px rgba(25,24,67,.24))}
   #bird .f1,#bird .f2{opacity:0}
   #bird.flying .perch{opacity:0}
@@ -321,26 +321,37 @@
     addEventListener('load',()=>setTimeout(()=>reveals.forEach(el=>el.classList.add('in')),1400));
   }else{reveals.forEach(el=>el.classList.add('in'));}
 
-  /* guacamaya scroll mascot: seccion activa estable + aleteo + sin jitter */
+  /* guacamaya: se posa SOBRE imagenes reales (doc coords) y vuela al cambiar de seccion */
   (function(){
     const bird=document.getElementById('bird');
     if(!bird||matchMedia('(prefers-reduced-motion: reduce)').matches||innerWidth<=900) return;
-    const secs=[...document.querySelectorAll('[data-perch]')];
-    const B=45;
-    function target(i){const p=secs[i].dataset.perch.split(',');return [innerWidth*parseFloat(p[0])-B, innerHeight*parseFloat(p[1])-B];}
-    let active=0, [tx,ty]=target(0), cx=tx, cy=ty, face=1;
+    const B=44;
+    const anchors=[
+      {sec:'.hero',     el:'.hero',            fx:.82, fy:.46},
+      {sec:'#ventanas', el:'#ventanas .vent--b', fx:.50, fy:.14},
+      {sec:'#mapa',     el:'.mapwrap img',     fx:.24, fy:.40},
+      {sec:'#contacto', el:'.band',            fx:.80, fy:.40},
+    ];
+    const secEls=anchors.map(a=>document.querySelector(a.sec));
+    function docPos(a){
+      const el=document.querySelector(a.el)||document.querySelector(a.sec);
+      const r=el.getBoundingClientRect();
+      return [r.left+scrollX + a.fx*r.width - B, r.top+scrollY + a.fy*r.height - B];
+    }
+    let active=0, [tx,ty]=docPos(anchors[0]), cx=tx, cy=ty, face=1;
     function pick(){
-      const mid=innerHeight/2; let best=0,bd=1e9;
-      secs.forEach((s,i)=>{const r=s.getBoundingClientRect();const c=r.top+r.height/2;const d=Math.abs(c-mid);if(d<bd){bd=d;best=i;}});
-      if(best!==active){active=best;[tx,ty]=target(best);}
+      const mid=scrollY+innerHeight/2; let best=0,bd=1e9;
+      secEls.forEach((s,i)=>{if(!s)return;const r=s.getBoundingClientRect();const c=r.top+scrollY+r.height/2;const d=Math.abs(c-mid);if(d<bd){bd=d;best=i;}});
+      if(best!==active){active=best;[tx,ty]=docPos(anchors[best]);}
     }
     addEventListener('scroll',pick,{passive:true});
-    addEventListener('resize',()=>{[tx,ty]=target(active);},{passive:true});
+    addEventListener('resize',()=>{[tx,ty]=docPos(anchors[active]);},{passive:true});
+    addEventListener('load',()=>{[tx,ty]=docPos(anchors[active]);cx=tx;cy=ty;});
     pick();
     function tick(){
       const dx=tx-cx, dy=ty-cy, dist=Math.hypot(dx,dy);
-      if(dist>0.6){cx+=dx*0.075; cy+=dy*0.075;}
-      bird.classList.toggle('flying',dist>24);
+      if(dist>0.6){cx+=dx*0.06; cy+=dy*0.06;}
+      bird.classList.toggle('flying',dist>30);
       if(Math.abs(dx)>1.5) face=dx<0?-1:1;
       bird.style.transform=`translate(${Math.round(cx)}px,${Math.round(cy)}px) scaleX(${face})`;
       requestAnimationFrame(tick);
